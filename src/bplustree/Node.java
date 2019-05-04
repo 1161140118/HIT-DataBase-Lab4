@@ -106,7 +106,7 @@ public class Node<V> {
             }
         }
         if (childNodes.isEmpty()) {
-            childNodes.add(new Leaf(this));
+            childNodes.add(new Leaf<V>(this));
         }
         childNodes.get(i).insertData(key, ref);
     }

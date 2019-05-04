@@ -3,7 +3,6 @@
  */
 package bplustree;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -18,7 +17,7 @@ public class BPlusTree<V> {
      * 
      */
     public BPlusTree(int rank) {
-        this.rank = rank;
+        BPlusTree.rank = rank;
         // 根节点始终维护同一个Node
         this.root = new Node<V>(null, false);
     }
@@ -37,6 +36,12 @@ public class BPlusTree<V> {
         return root.search(key);
     }
     
+    /**
+     * range search from start to end
+     * @param start start key, include 
+     * @param end   end key, include
+     * @return  value list
+     */
     public List<V> rangeSearch(int start,int end){
         return root.rangeSearch(start, end);
     }
@@ -47,7 +52,7 @@ public class BPlusTree<V> {
         for(int i=1;i<=10;i++) {
             tree.insertData(i,new Reference(i, i));
         }
-        Reference reference = tree.search(5);
+        List<Reference> reference = tree.rangeSearch(3, 7);
         System.out.println(reference);
     }
 
