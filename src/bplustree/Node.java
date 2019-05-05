@@ -112,7 +112,7 @@ public class Node<V> {
     }
 
 
-    protected V search(int key) {
+    protected List<V> search(int key) {
         int i = 0;
         for (i = 0; i < keyList.size(); i++) {
             if (key < keyList.get(i)) {
@@ -125,7 +125,7 @@ public class Node<V> {
         return childNodes.get(i).search(key);
     }
 
-    protected List<V> rangeSearch(int start, int end) {
+    protected List<List<V>> rangeSearch(int start, int end) {
         int i = 0;
         for (i = 0; i < keyList.size(); i++) {
             if (start < keyList.get(i)) {

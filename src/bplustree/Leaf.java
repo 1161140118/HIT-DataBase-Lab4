@@ -3,6 +3,9 @@
  */
 package bplustree;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,8 +16,8 @@ import java.util.List;
 public class Leaf<V> extends Node<V> {
     /** 下一个叶结点 */
     private Leaf<V> next;
-    /** 数据索引 */
-    private List<V> refList;
+    /** 数据索引，相同Key，使用链表存 */
+    private List<List<V>> refList;
 
     /**
      * @param parent
@@ -25,7 +28,7 @@ public class Leaf<V> extends Node<V> {
         this.refList = new LinkedList<>();
     }
 
-    private Leaf(Node<V> parent, List<Integer> newKeyList, List<V> newRefList) {
+    private Leaf(Node<V> parent, List<Integer> newKeyList, List<List<V>> newRefList) {
         super(parent, false);
         this.keyList = newKeyList;
         this.refList = newRefList;
@@ -38,14 +41,20 @@ public class Leaf<V> extends Node<V> {
      */
     @Override
     protected void insertData(int key, V ref) {
-        int i = 0;
-        for (i = 0; i < refList.size(); i++) {
-            if (key < keyList.get(i)) {
-                break;
+        if (keyList.contains(key)) {
+            // 已存在key，添加到链表
+            refList.get(keyList.indexOf(key)).add(ref);
+        }else {
+            // 不存在Key，插入Key和新链表
+            int i = 0;
+            for (i = 0; i < refList.size(); i++) {
+                if (key < keyList.get(i)) {
+                    break;
+                }
             }
+            keyList.add(i, key);
+            refList.add(i, new LinkedList<V>(Arrays.asList(ref))); //TODO
         }
-        keyList.add(i, key);
-        refList.add(i, ref);
         System.out.println("叶结点插入"+key);
         
         /**
@@ -55,7 +64,7 @@ public class Leaf<V> extends Node<V> {
         if (refList.size() >= BPlusTree.rank) {
             int split = BPlusTree.rank / 2;
             List<Integer> newKeyList = new LinkedList<>();
-            List<V> newRefList = new LinkedList<>();
+            List<List<V>> newRefList = new LinkedList<>();
             // copy
             for (int j = split; j < keyList.size(); j++) {
                 newKeyList.add(keyList.get(j));
@@ -70,7 +79,7 @@ public class Leaf<V> extends Node<V> {
             }
             Leaf<V> newLeaf = new Leaf<V>(parent, newKeyList, newRefList);
             this.next = newLeaf;
-            System.out.println("叶结点分裂."+key);
+            System.out.println("叶结点分裂."+key+" : "+newKeyList);
             parent.insertNode(newKeyList.get(0), newLeaf);
         }
         System.out.println(key+" 插入最终结果 "+keyList);
@@ -86,7 +95,7 @@ public class Leaf<V> extends Node<V> {
      * @see bplustree.Node#search(int)
      */
     @Override
-    protected V search(int key) {
+    protected List<V> search(int key) {
         int index = keyList.indexOf(key);
         if (index == -1) {
             return null;
@@ -100,8 +109,8 @@ public class Leaf<V> extends Node<V> {
      * @see bplustree.Node#rangeSearch(int, int)
      */
     @Override
-    protected List<V> rangeSearch(int start, int end) {
-        List<V> references = new LinkedList<>();
+    protected List<List<V>> rangeSearch(int start, int end) {
+        List<List<V>> references = new LinkedList<>();
         int i = 0;
         for (i = 0; i < keyList.size(); i++) {
             if (start <= keyList.get(i)) {
@@ -120,8 +129,8 @@ public class Leaf<V> extends Node<V> {
     /**
      * 递归调用，范围查询到末尾。
      */
-    private List<V> endOfSearch(int end) {
-        List<V> references = new LinkedList<>();
+    private List<List<V>> endOfSearch(int end) {
+        List<List<V>> references = new LinkedList<>();
         int i = 0;
         for (; i < keyList.size(); i++) {
             if (end < keyList.get(i)) {

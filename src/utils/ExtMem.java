@@ -5,9 +5,10 @@ package utils;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 
 /**
- * @author chen
+ * @author standingby
  *
  */
 public class ExtMem {
@@ -25,10 +26,5 @@ public class ExtMem {
         }
     }
     
-    public static void main(String[] args) {
-        String test = "ab,dfs,sd,, ,";
-        System.out.println(Arrays.toString(test.split(",")));
-        
-    }
     
 }

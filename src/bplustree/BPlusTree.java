@@ -10,12 +10,10 @@ import java.util.List;
  *
  */
 public class BPlusTree<V> {
+    /** 阶数，当结点Key>=rank时，分裂  */
     public static int rank;
     private Node<V> root;
     
-    /**
-     * 
-     */
     public BPlusTree(int rank) {
         BPlusTree.rank = rank;
         // 根节点始终维护同一个Node
@@ -32,7 +30,7 @@ public class BPlusTree<V> {
      * @param key 索引键
      * @return
      */
-    public V search(int key) {
+    public List<V> search(int key) {
         return root.search(key);
     }
     
@@ -42,7 +40,7 @@ public class BPlusTree<V> {
      * @param end   end key, include
      * @return  value list
      */
-    public List<V> rangeSearch(int start,int end){
+    public List<List<V>> rangeSearch(int start,int end){
         return root.rangeSearch(start, end);
     }
     
@@ -52,7 +50,8 @@ public class BPlusTree<V> {
         for(int i=1;i<=10;i++) {
             tree.insertData(i,new Reference(i, i));
         }
-        List<Reference> reference = tree.rangeSearch(3, 7);
+        tree.insertData(5, new Reference(5, 5));
+        List<List<Reference>> reference = tree.rangeSearch(3, 7);
         System.out.println(reference);
     }
 

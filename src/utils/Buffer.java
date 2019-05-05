@@ -6,35 +6,28 @@ package utils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * @author chen
+ * @author standingby
  *
  */
 public class Buffer {
     private int ioCounter=0;
-    private int bufferSize;
-    private int blockSize;
     private int blockTotalNumber;
     private int blockFreeNumber;
     
-    /** 存储数据 */
+    /** 存储数据块 */
     public List<Block> blocks = new ArrayList<>();
     
     
     protected Buffer(int bufferSize, int blockSize) {
-        super();
-        this.bufferSize = bufferSize;
-        this.blockSize = blockSize;
-        this.blockTotalNumber = bufferSize / blockSize+1;
+        this.blockTotalNumber = bufferSize / (blockSize+1);
         this.blockFreeNumber = blockTotalNumber;
         
         // 初始化block 
@@ -77,17 +70,24 @@ public class Buffer {
         }
     }
     
+    public void freeBlockInBuffer(Block block) {
+        if (!block.free) {
+            block.free=true;
+            blockFreeNumber++;
+        }
+    }
+    
     
     public Block readBlockFromDisk(int addr) {
         if (blockFreeNumber==0) {
             System.err.println("Buffer Overflows!");
             return null;
         }
+        
+        // 查询空块
         Block block=null;
-        int index=-1;
         for(int i=0;i<blockTotalNumber;i++) {
             if (blocks.get(i).free) {
-                index = i;
                 block=blocks.get(i);
                 break;
             }
@@ -95,18 +95,19 @@ public class Buffer {
         if (block==null) { // 无空块
             return null;
         }
+        
         // 读取文件内容到block
         String filename= ExtMem.DISKADDR+addr+".blk";
-        File file = new File(filename);
         try {
             List<String> strings = Files.readAllLines(Paths.get(filename));
             //  parse to block
             String[] line = strings.get(0).split(",");
-            for(int i=0;i<line.length;i++) {
+            for(int i=0;i<line.length && i<block.data.length;i++) {
                 block.data[i] = Integer.valueOf(line[i]);
             }
             block.free=false;
             blockFreeNumber--;
+            ioCounter ++;
             return block;
         } catch (IOException e) {
             System.err.println("Reading Block Failed! :"+filename);
@@ -115,19 +116,30 @@ public class Buffer {
         return null;
     }
     
-    
-    public boolean writeBlockToDisk(int index , int addr) {
+    public boolean writeBlockToDisk(Block block,int addr) {
         String filename= ExtMem.DISKADDR+addr+".blk";
         File file = new File(filename);
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-            writer.write(blocks.get(index).toString());     
+            writer.write(blocks.toString());     
+            writer.close();
+            block.free = true;
+            blockFreeNumber++;
+            ioCounter++;
             return true;
         } catch (IOException e) {
             System.err.println("Reading Block Failed! :"+filename);
             e.printStackTrace();
             return false;
         }
+    }
+    
+    public boolean writeBlockToDisk(int index , int addr) {
+        return writeBlockToDisk(blocks.get(index), addr);
+    }
+    
+    public int getIOCounter() {
+        return ioCounter;
     }
     
 }
