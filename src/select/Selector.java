@@ -3,6 +3,7 @@
  */
 package select;
 
+import java.util.List;
 import process.Calculator;
 import utils.Block;
 import utils.Buffer;
@@ -32,32 +33,33 @@ public class Selector {
         Block output = buffer.getNewBlockInBuffer();
         Block input;
         int i= Calculator.RAWDATABASE;
+        
         // R.A
         for( ; i< Calculator.RAWDATABASE + 16 ;i++) {
+            // 100000 - 100015
             input = buffer.readBlockFromDisk(i);
-            System.out.println(input);
-            for(int j=0;i< 7;j++) {
+            for(int j=0;j< 7;j++) {
                 if (input.data[j*2] == valueA) {
                     output.writeData(input.data[j*2]);
                     output.writeData(input.data[j*2+1]);
                     if (output.isFull()) {
                     	System.out.println(output);
 						buffer.writeBlockToDisk(output, base);
-						buffer.freeBlockInBuffer(output);
 						output = buffer.getNewBlockInBuffer();
 						base++;
 					}
                 }
             }
-			buffer.writeBlockToDisk(output, base);
-			buffer.freeBlockInBuffer(output);
             buffer.freeBlockInBuffer(input);
         }
+        buffer.writeBlockToDisk(output, base);
+        output = buffer.getNewBlockInBuffer();
         // S.C
         base += 1000;
-        for( ; i< Calculator.RAWDATABASE + 32 ;i++) {
+        for( ; i< Calculator.RAWDATABASE + 48 ;i++) {
+            // 100016 - 100047
             input = buffer.readBlockFromDisk(i);
-            for(int j=0;i< 7;j++) {
+            for(int j=0;j< 7;j++) {
                 if (input.data[j*2] == valueC) {
                     output.writeData(input.data[j*2]);
                     output.writeData(input.data[j*2+1]);
@@ -69,11 +71,15 @@ public class Selector {
 					}
                 }
             }
-			buffer.writeBlockToDisk(output, base);
-			buffer.freeBlockInBuffer(output);
-            buffer.freeBlockInBuffer(input);
+			buffer.freeBlockInBuffer(input);
         }
+        buffer.writeBlockToDisk(output, base);
+        buffer.freeBlockInBuffer(output);
         System.out.println("Linear Select with I/O : "+(buffer.getIOCounter() - basicIO));
+    }
+    
+    public void binarySearch(List<Integer> sortedBlockAddrs) {
+        
     }
     
     public static void main(String[] args) {
