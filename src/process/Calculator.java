@@ -35,6 +35,9 @@ public class Calculator {
             data = new int[16];
             for(int j=0;j<7;j++) {
                 data[j*2] = random.nextInt(40)+1;
+                if (data[2*j]==40) {
+					System.out.println("ok. 40");
+				}
                 data[j*2+1] = random.nextInt(1000)+1;
             }
             data[14] = RAWDATABASE+i+1;
@@ -48,6 +51,9 @@ public class Calculator {
             data = new int[16];
             for(int j=0;j<7;j++) {
                 data[j*2] = random.nextInt(41)+20;
+                if (data[2*j]==60) {
+					System.out.println("ok. 60");
+				}
                 data[j*2+1] = random.nextInt(1000)+1;
             }
             data[14] = RAWDATABASE+i+1;

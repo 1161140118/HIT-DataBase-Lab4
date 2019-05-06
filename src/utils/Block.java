@@ -19,6 +19,7 @@ public class Block {
         this.blockSize = blockSize;
         this.id = id;
         data = new int[blockSize/4];
+        free();
     }
     
     protected void free(){
@@ -30,6 +31,10 @@ public class Block {
     public void writeData(int d) {
         data[index] = d;
         index++;
+    }
+    
+    public boolean isFull() {
+    	return index+2 >= data.length;
     }
     
     /* (non-Javadoc)
