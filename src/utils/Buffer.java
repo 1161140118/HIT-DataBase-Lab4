@@ -19,8 +19,8 @@ import java.util.List;
  */
 public class Buffer {
     private int ioCounter=0;
-    private int blockTotalNumber;
     private int blockFreeNumber;
+    public final int blockTotalNumber;
     
     /** ´æ´¢Êý¾Ý¿é */
     public List<Block> blocks = new ArrayList<>();
@@ -41,7 +41,7 @@ public class Buffer {
      */
     public void free() {
         for (Block block : blocks) {
-            block.free=true;
+            block.free();
         }
     }
     
@@ -65,14 +65,14 @@ public class Buffer {
     
     public void freeBlockInBuffer(int index) {
         if (!blocks.get(index).free) {
-            blocks.get(index).free=true;
+            blocks.get(index).free();
             blockFreeNumber++;
         }
     }
     
     public void freeBlockInBuffer(Block block) {
         if (!block.free) {
-            block.free=true;
+            block.free();
             blockFreeNumber++;
         }
     }
@@ -121,9 +121,9 @@ public class Buffer {
         File file = new File(filename);
         try {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)));
-            writer.write(blocks.toString());     
+            writer.write(block.toString());     
             writer.close();
-            block.free = true;
+            block.free();
             blockFreeNumber++;
             ioCounter++;
             return true;
@@ -141,6 +141,12 @@ public class Buffer {
     public int getIOCounter() {
         return ioCounter;
     }
+
+    public int getBlockFreeNumber() {
+        return blockFreeNumber;
+    }
+    
+    
     
 }
 
