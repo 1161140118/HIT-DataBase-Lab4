@@ -27,11 +27,11 @@ public class Calculator {
     public static final int EXTERNALBASE = 110000;
     /** 外存排序结果基址 */
     public static final int SORTEDBASE = 120000;
-    /** 选择结果基址，选择结果地址 2x00xx */
+    /** 选择结果基址，选择结果地址 2xx0xx */
     public static final int SELECTBASE = 200000;
-    /** 投影结果基址，投影结果地址 3000xx */
+    /** 投影结果基址，投影结果地址 30x0xx */
     public static final int PROJECTIONBASE = 300000;
-    /** 连接结果基址，连接结果地址 4x00xx */
+    /** 连接结果基址，连接结果地址 4xx0xx */
     public static final int JOINBASE = 400000;
 
 
