@@ -77,7 +77,11 @@ public class Buffer {
         }
     }
 
-
+    /**
+     * ¶ÁÈ¡´ÅÅÌ¿éÄÚÈİµ½»º´æ£¬²¢·µ»Ø»º´æ¿é
+     * @param addr
+     * @return  null: »º´æÒÑÂú
+     */
     public Block readBlockFromDisk(int addr) {
         if (blockFreeNumber == 0) {
             System.err.println("Buffer Overflows!");

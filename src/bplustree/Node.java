@@ -86,16 +86,30 @@ public class Node<V> {
                 this.keyList = leftKeyList;
                 this.childNodes = leftChilds;
                 parent.insertNode(splitKey, rightChild);
-                System.out.println("非叶节点上溢 "+splitKey);
+                // 更新父子关系
+                for (Node<V> right : rightChilds) {
+                    right.parent = rightChild;
+                }
+
+                System.out.println("非叶节点上溢 " + splitKey);
             } else {
                 // 根节点下推
+                // 重设父子关系
+                for (Node<V> left : leftChilds) {
+                    left.parent = leftChild;
+                }
+                for (Node<V> right : rightChilds) {
+                    right.parent = rightChild;
+                }
+
                 // 更新当前结点，分裂后下推
                 this.keyList.add(splitKey);
                 this.childNodes.add(leftChild);
                 this.childNodes.add(rightChild);
-                System.out.println("根节点下推"+splitKey);
+                System.out.println("根节点下推" + splitKey);
             }
         }
+        System.out.println(keyList);
     }
 
     protected void insertData(int key, V ref) {
@@ -135,11 +149,5 @@ public class Node<V> {
         return childNodes.get(i).rangeSearch(start, end);
     }
 
-    public static void main(String[] args) {
-        List<Integer> list = new LinkedList<>();
-        list.add(0, 1);
-        list.add(1, 2);
-        System.out.println(list);
-    }
 
 }

@@ -23,8 +23,10 @@ public class Calculator {
     public static final int RBASE = 0;
     /** S 结果偏移 */
     public static final int SBASE = 1000;
-    /** 外存排序基址 */
-    public static final int SORTEDBASE = 110000;
+    /** 外存中间结果排序基址 */
+    public static final int EXTERNALBASE = 110000;
+    /** 外存排序结果基址 */
+    public static final int SORTEDBASE = 120000;
     /** 选择结果基址，选择结果地址 2x00xx */
     public static final int SELECTBASE = 200000;
     /** 投影结果基址，投影结果地址 3000xx */
@@ -75,21 +77,31 @@ public class Calculator {
         System.out.println("Init Buffer with I/O : " + buffer.getIOCounter());
     }
 
-    public static List<Integer> getAddrR() {
+    public static List<Integer> getAddrList(String relation, boolean sorted) {
+        int base = sorted ? SORTEDBASE : RAWDATABASE;
+        int len;
+        switch (relation) {
+            case "R":
+                base += RBASE;
+                len = 16;
+                break;
+
+            case "S":
+                base += SBASE;
+                len = 32;
+                break;
+
+            default:
+                System.err.println("Parameter Error : relation should be 'R' or 'S' ");
+                return null;
+        }
         List<Integer> result = new ArrayList<>();
-        for (int i = 0; i < 16; i++) {
-            result.add(RAWDATABASE + RBASE + i);
+        for (int i = 0; i < len; i++) {
+            result.add(base + i);
         }
         return result;
     }
 
-    public static List<Integer> getAddrS() {
-        List<Integer> result = new ArrayList<>();
-        for (int i = 0; i < 32; i++) {
-            result.add(RAWDATABASE + SBASE + i);
-        }
-        return null;
-    }
 
 
     public static void main(String[] args) {

@@ -4,8 +4,10 @@
 package bplustree;
 
 import java.util.List;
+import process.Calculator;
 import utils.Block;
 import utils.Buffer;
+import utils.ExtMem;
 
 /**
  * @author standingby
@@ -23,6 +25,9 @@ public class BPlusTree<V> {
     }
 
     public void insertData(int key, V ref) {
+        if (key==40) {
+            System.err.println("40");
+        }
         root.insertData(key, ref);
     }
 
@@ -53,19 +58,14 @@ public class BPlusTree<V> {
             for (int i = 0; i < 7; i++) {
                 tree.insertData(input.data[i * 2], new Reference(integer, i * 2));
             }
+            buffer.freeBlockInBuffer(input);
         }
         return tree;
     }
 
 
     public static void main(String[] args) {
-        BPlusTree<Reference> tree = new BPlusTree<>(4);
-        for (int i = 1; i <= 10; i++) {
-            tree.insertData(i, new Reference(i, i));
-        }
-        tree.insertData(5, new Reference(5, 5));
-        List<List<Reference>> reference = tree.rangeSearch(3, 7);
-        System.out.println(reference);
+        getBPlusTree(Calculator.getAddrList("R", false), ExtMem.getDefaultBuffer());
     }
 
 }

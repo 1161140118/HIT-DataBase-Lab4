@@ -18,7 +18,7 @@ public class Leaf<V> extends Node<V> {
     private Leaf<V> next;
     /** 数据索引，相同Key，使用链表存 */
     private List<List<V>> refList;
-    
+
 
     /**
      * @param parent
@@ -42,10 +42,18 @@ public class Leaf<V> extends Node<V> {
      */
     @Override
     protected void insertData(int key, V ref) {
+        // TODO
+        if (key == 40) {
+            System.err.println("insert 40");
+        }
         if (keyList.contains(key)) {
             // 已存在key，添加到链表
             refList.get(keyList.indexOf(key)).add(ref);
-        }else {
+            // TODO
+            if (key == 40) {
+                System.err.println(refList.get(keyList.indexOf(key)));
+            }
+        } else {
             // 不存在Key，插入Key和新链表
             int i = 0;
             for (i = 0; i < refList.size(); i++) {
@@ -54,10 +62,10 @@ public class Leaf<V> extends Node<V> {
                 }
             }
             keyList.add(i, key);
-            refList.add(i, new LinkedList<V>(Arrays.asList(ref))); //TODO
+            refList.add(i, new LinkedList<V>(Arrays.asList(ref)));
         }
-        System.out.println("叶结点插入"+key);
-        
+        System.out.println("叶结点插入" + key);
+
         /**
          * 判定分裂
          * 例：4阶树，达到4个数据结点，分裂，上溢第三个key（index=2） 
@@ -72,7 +80,7 @@ public class Leaf<V> extends Node<V> {
                 newRefList.add(refList.get(j));
             }
             // remove
-            int len  = keyList.size();
+            int len = keyList.size();
             for (int j = split; j < len; j++) {
                 // 执行 size-split 此
                 keyList.remove(split);
@@ -80,10 +88,10 @@ public class Leaf<V> extends Node<V> {
             }
             Leaf<V> newLeaf = new Leaf<V>(parent, newKeyList, newRefList);
             this.next = newLeaf;
-            System.out.println("叶结点分裂."+key+" : "+newKeyList);
+            System.out.println("叶结点分裂." + key + " : " + keyList + newKeyList); // TODO
             parent.insertNode(newKeyList.get(0), newLeaf);
         }
-        System.out.println(key+" 插入最终结果 "+keyList);
+        // System.out.println(key + " 插入最终结果 " + keyList);
         // 检查不变量
         if (keyList.size() != refList.size()) {
             System.err.println("Error : The length of keylist not equals to reflist!");
@@ -139,7 +147,7 @@ public class Leaf<V> extends Node<V> {
             }
             references.add(refList.get(i));
         }
-        if (i==keyList.size() && next!=null) {
+        if (i == keyList.size() && next != null) {
             // 范围查询未结束
             references.addAll(next.endOfSearch(end));
         }

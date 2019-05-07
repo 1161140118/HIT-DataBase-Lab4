@@ -227,11 +227,11 @@ public class ExtSort {
      * @param args
      */
     public static void main(String[] args) {
-        System.out.println(sort(Calculator.getAddrR(), ExtMem.getDefaultBuffer(),
-                Calculator.SORTEDBASE + Calculator.RBASE));
+        System.out.println(sort(Calculator.getAddrList("R", false), ExtMem.getDefaultBuffer(),
+                Calculator.EXTERNALBASE + Calculator.RBASE));
 
-        System.out.println(sort(Calculator.getAddrS(), ExtMem.getDefaultBuffer(),
-                Calculator.SORTEDBASE + Calculator.SBASE));
+        System.out.println(sort(Calculator.getAddrList("S", false), ExtMem.getDefaultBuffer(),
+                Calculator.EXTERNALBASE + Calculator.SBASE));
     }
 
 }
