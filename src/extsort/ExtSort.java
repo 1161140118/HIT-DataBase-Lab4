@@ -19,6 +19,7 @@ public class ExtSort {
     private static int secAddr;
 
     public static List<Integer> sort(List<Integer> blockAddrs, utils.Buffer buffer, int baseAddr) {
+        int baseIO = buffer.getIOCounter();
         ExtSort.buffer = buffer;
 
         /** ×îÐ¡¹é²¢¶Î */
@@ -41,7 +42,9 @@ public class ExtSort {
             temp.clear();
         }
         secAddr = baseAddr + 10000;
-        return sectionMerge(addrLists);
+        List<Integer> result = sectionMerge(addrLists);
+        System.out.println("External Sorting with I/O : " + (buffer.getIOCounter() - baseIO));
+        return result;
     }
 
     /**
@@ -224,18 +227,11 @@ public class ExtSort {
      * @param args
      */
     public static void main(String[] args) {
-        List<Integer> R = new LinkedList<>();
-        for (int i = 0; i < 16; i++) {
-            R.add(i + Calculator.RAWDATABASE + Calculator.RBASE);
-        }
-        System.out.println(
-                sort(R, ExtMem.getDefaultBuffer(), Calculator.SORTEDBASE + Calculator.RBASE));
-        List<Integer> S = new LinkedList<>();
-        for (int i = 0; i < 32; i++) {
-            S.add(i + Calculator.RAWDATABASE + Calculator.SBASE);
-        }
-        System.out.println(
-                sort(S, ExtMem.getDefaultBuffer(), Calculator.SORTEDBASE + Calculator.SBASE));
+        System.out.println(sort(Calculator.getAddrR(), ExtMem.getDefaultBuffer(),
+                Calculator.SORTEDBASE + Calculator.RBASE));
+
+        System.out.println(sort(Calculator.getAddrS(), ExtMem.getDefaultBuffer(),
+                Calculator.SORTEDBASE + Calculator.SBASE));
     }
 
 }

@@ -75,12 +75,26 @@ public class Calculator {
         System.out.println("Init Buffer with I/O : " + buffer.getIOCounter());
     }
 
+    public static List<Integer> getAddrR() {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < 16; i++) {
+            result.add(RAWDATABASE + RBASE + i);
+        }
+        return result;
+    }
+
+    public static List<Integer> getAddrS() {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < 32; i++) {
+            result.add(RAWDATABASE + SBASE + i);
+        }
+        return null;
+    }
 
 
     public static void main(String[] args) {
         Calculator.initData();
     }
-
 
 
 }
