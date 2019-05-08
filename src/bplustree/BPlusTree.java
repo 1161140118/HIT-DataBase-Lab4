@@ -25,9 +25,6 @@ public class BPlusTree<V> {
     }
 
     public void insertData(int key, V ref) {
-        if (key==40) {
-            System.err.println("40");
-        }
         root.insertData(key, ref);
     }
 

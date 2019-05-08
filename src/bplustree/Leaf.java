@@ -3,8 +3,6 @@
  */
 package bplustree;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,17 +40,9 @@ public class Leaf<V> extends Node<V> {
      */
     @Override
     protected void insertData(int key, V ref) {
-        // TODO
-        if (key == 40) {
-            System.err.println("insert 40");
-        }
         if (keyList.contains(key)) {
             // 已存在key，添加到链表
             refList.get(keyList.indexOf(key)).add(ref);
-            // TODO
-            if (key == 40) {
-                System.err.println(refList.get(keyList.indexOf(key)));
-            }
         } else {
             // 不存在Key，插入Key和新链表
             int i = 0;
@@ -88,10 +78,9 @@ public class Leaf<V> extends Node<V> {
             }
             Leaf<V> newLeaf = new Leaf<V>(parent, newKeyList, newRefList);
             this.next = newLeaf;
-            System.out.println("叶结点分裂." + key + " : " + keyList + newKeyList); // TODO
+            System.out.println("叶结点分裂." + key + " : " + keyList + newKeyList);
             parent.insertNode(newKeyList.get(0), newLeaf);
         }
-        // System.out.println(key + " 插入最终结果 " + keyList);
         // 检查不变量
         if (keyList.size() != refList.size()) {
             System.err.println("Error : The length of keylist not equals to reflist!");
