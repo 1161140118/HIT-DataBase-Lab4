@@ -41,6 +41,10 @@ public class Block {
         return index == 0;
     }
 
+    public int getIndex() {
+        return index;
+    }
+    
     /*
      * (non-Javadoc)
      * 

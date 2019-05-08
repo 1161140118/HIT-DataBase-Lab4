@@ -31,7 +31,7 @@ public class Calculator {
     public static final int SELECTBASE = 200000;
     /** 投影结果基址，投影结果地址 30x0xx */
     public static final int PROJECTIONBASE = 300000;
-    /** 连接结果基址，连接结果地址 4xx0xx */
+    /** 连接结果基址，连接结果地址 4x00xx */
     public static final int JOINBASE = 400000;
 
 
