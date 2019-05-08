@@ -16,52 +16,50 @@ import utils.ExtMem;
  */
 public class Joiner {
     private Buffer buffer;
-    private List<Integer> addrR;
-    private List<Integer> addrS;
 
-    public Joiner(Buffer buffer, List<Integer> addrR, List<Integer> addrS) {
+    public Joiner(Buffer buffer) {
         super();
         this.buffer = buffer;
-        this.addrR = addrR;
-        this.addrS = addrS;
     }
 
 
-    public List<Integer> nestLoopJoin() {
+    public List<Integer> nestLoopJoin(List<Integer> addrR, List<Integer> addrS) {
         buffer.free();
         int basicIO = buffer.getIOCounter();
         List<Integer> result = new ArrayList<>();
         // 基址
         int base = Calculator.JOINBASE + 10000;
         Block output = buffer.getNewBlockInBuffer();
-        Block inputR;
-        List<Block> inputS = new ArrayList<>();
+        Block blockS;
+        List<Block> blockR = new ArrayList<>();
 
-        for (Integer raddr : addrR) {
-            inputR = buffer.readBlockFromDisk(raddr);
 
-            for (int iaddr = 0; iaddr < addrS.size();) {
-                // 读满缓冲区
-                int len = buffer.getBlockFreeNumber();
-                len = len + iaddr >= addrS.size() ? addrS.size() - iaddr : len;
-                inputS.clear();;
-                for (int j = 0; j < len; j++) {
-                    inputS.add(buffer.readBlockFromDisk(addrS.get(iaddr + j)));
-                }
-                iaddr += len;
+        for (int iaddr = 0; iaddr < addrR.size();) {
+            // 尽量多读入缓冲区，仅留1块给S
+            int len = buffer.getBlockFreeNumber() - 1;
+            len = len + iaddr >= addrR.size() ? addrR.size() - iaddr : len;
+            blockR.clear();
+            for (int j = 0; j < len; j++) {
+                blockR.add(buffer.readBlockFromDisk(addrR.get(iaddr + j)));
+            }
+            iaddr += len;
+
+            for (Integer saddr : addrS) {
+                blockS = buffer.readBlockFromDisk(saddr);
 
                 // Join
-                for (Block block : inputS) {
-                    // 遍历缓冲中的S块
+                for (Block block : blockR) {
+                    // 遍历缓冲中的R块
                     for (int i = 0; i < 7; i++) {
                         // 对R块数据
+
                         for (int j = 0; j < 7; j++) {
                             // 遍历 S块数据
-                            if (inputR.data[i * 2] == block.data[j * 2]) {
-                                output.writeData(inputR.data[i * 2]);
-                                output.writeData(inputR.data[i * 2 + 1]);
+                            if (blockS.data[i * 2] == block.data[j * 2]) {
                                 output.writeData(block.data[j * 2]);
                                 output.writeData(block.data[j * 2 + 1]);
+                                output.writeData(blockS.data[i * 2]);
+                                output.writeData(blockS.data[i * 2 + 1]);
                                 if (output.getIndex() == 12) {
                                     output.writeData(0);
                                     output.writeData(0);
@@ -75,11 +73,11 @@ public class Joiner {
                         }
                     }
                 }
-                for (Block block : inputS) {
-                    buffer.freeBlockInBuffer(block);
-                }
+                buffer.freeBlockInBuffer(blockS);
             } // end S
-            buffer.freeBlockInBuffer(inputR);
+            for (Block block : blockR) {
+                buffer.freeBlockInBuffer(block);
+            }
         } // end R
 
         if (!output.isEmpty()) {
@@ -91,23 +89,57 @@ public class Joiner {
         return result;
     }
 
-    public List<Integer> sortMergeJoin() {
+    public List<Integer> sortMergeJoin(List<Integer> addrR, List<Integer> addrS) {
+        buffer.free();
+        int basicIO = buffer.getIOCounter();
+        List<Integer> result = new ArrayList<>();
+        // 基址
+        int base = Calculator.JOINBASE + 20000;
+        Block output = buffer.getNewBlockInBuffer();
+        Block inputR;
+        Block inputS;
 
-        return null;
+        for (Integer r : addrR) {
+            inputR = buffer.readBlockFromDisk(r);
+            for (int i = 0; i < 7; i++) {
+                // 顺序遍历 R 中每个元组
+
+
+
+            } // end r
+            buffer.freeBlockInBuffer(inputR);
+        }
+
+
+
+        System.out.println("Sort-Merge-Join with I/O : " + (buffer.getIOCounter() - basicIO));
+        return result;
     }
 
 
     public List<Integer> hashJoin() {
+        buffer.free();
+        int basicIO = buffer.getIOCounter();
+        List<Integer> result = new ArrayList<>();
+        // 基址
+        int base = Calculator.JOINBASE + 30000;
+        Block output = buffer.getNewBlockInBuffer();
+        Block inputR;
+        List<Block> inputS = new ArrayList<>();
 
 
-        return null;
+
+        System.out.println("Sort-Merge-Join with I/O : " + (buffer.getIOCounter() - basicIO));
+        return result;
     }
 
 
 
     public static void main(String[] args) {
-        System.out.println(new Joiner(ExtMem.getDefaultBuffer(), Calculator.getAddrList("R", false),
-                Calculator.getAddrList("S", false)).nestLoopJoin());
+        // nest-loop-join
+        System.out.println(new Joiner(ExtMem.getDefaultBuffer()).nestLoopJoin(
+                Calculator.getAddrList("R", false), Calculator.getAddrList("S", false)));
+
     }
 
 }
