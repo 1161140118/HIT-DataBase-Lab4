@@ -5,6 +5,7 @@ package operator;
 
 import java.util.ArrayList;
 import java.util.List;
+import bplustree.Reference;
 import process.Calculator;
 import utils.Block;
 import utils.Buffer;
@@ -97,20 +98,127 @@ public class Joiner {
         int base = Calculator.JOINBASE + 20000;
         Block output = buffer.getNewBlockInBuffer();
         Block inputR;
-        Block inputS;
+        Block inputS = buffer.readBlockFromDisk(addrS.get(0));
+        Block preS = buffer.readBlockFromDisk(addrS.get(0));
+
+        int preKey = inputS.data[0];
+        int curKey = inputS.data[0];
+        int preAddr = 0;
+        int curAddr = 0;
+        int preindex = 0;
+        int curindex = 0;
+
+        boolean end = false;
 
         for (Integer r : addrR) {
+            if (end) {
+                break;
+            }
             inputR = buffer.readBlockFromDisk(r);
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 7 && !end; i++) {
                 // 顺序遍历 R 中每个元组
+                int rKey = inputR.data[i * 2];
 
+                for (;; curindex++) {
+                    if (curindex == 7) {
+                        if (curAddr + 1 != addrS.size()) {
+                            // 平凡
+                            // 继续读取下一个 S block
+                            if (inputS.id != preS.id) {
+                                buffer.freeBlockInBuffer(inputS);
+                            }
+                            inputS = buffer.readBlockFromDisk(addrS.get(++curAddr));
+                            curindex = 0;
+                        } else {
+                            // 特殊
+                            // S 读完
+                            if (rKey > curKey) {
+                                end = true;
+                                break;
+                            } else {
+                                // 回溯
+                                int sid = inputS.id;
+                                inputS = preS;
+                                curindex = preindex;
+                                curAddr = preAddr;
+                                if (sid != preS.id) {
+                                    // 不是同一个磁盘块，不占同一片缓存
+                                    buffer.freeBlockInBuffer(sid);
+                                }
+                            }
+                        }
 
+                    }
+
+                    // 读取 s
+                    curKey = inputS.data[2 * curindex];
+
+                    if (rKey > curKey) {
+                        // s较小，继续读取下一个s
+                    } else
+
+                    if (rKey == curKey) {
+                        if (preKey != rKey) {
+                            // 更新preKey
+                            int preid = preS.id;
+                            preKey = rKey;
+                            preAddr = curAddr;
+                            preS = inputS;
+                            preindex = curindex;
+                            if (preid != inputS.id) {
+                                buffer.freeBlockInBuffer(preid);
+                            }
+                        }
+                        output.writeData(inputR.data[i * 2]);
+                        output.writeData(inputR.data[i * 2 + 1]);
+                        output.writeData(inputS.data[curindex * 2]);
+                        output.writeData(inputS.data[curindex * 2 + 1]);
+                        if (output.getIndex() == 12) {
+                            output.writeData(0);
+                            output.writeData(0);
+                            output.writeData(base + 1);
+                            buffer.writeBlockToDisk(output, base);
+                            result.add(base);
+                            output = buffer.getNewBlockInBuffer();
+                            base++;
+                        }
+                        // 继续读s
+
+                    } else
+
+                    if (rKey < curKey) {
+                        if (rKey == preKey) {
+                            int sid = inputS.id;
+                            // s 回溯
+                            inputS = preS;
+                            curindex = preindex;
+                            curAddr = preAddr;
+                            if (sid != preS.id) {
+                                buffer.freeBlockInBuffer(sid);
+                            }
+                        } else {
+                            int preid = preS.id;
+                            preAddr = curAddr;
+                            preS = inputS;
+                            preindex = curindex;
+                            if (preid != inputS.id) {
+                                buffer.freeBlockInBuffer(preid);
+                            }
+                        }
+                        // 读取下一个r
+                        break;
+                    }
+                }
 
             } // end r
             buffer.freeBlockInBuffer(inputR);
         }
 
 
+        if (!output.isEmpty()) {
+            buffer.writeBlockToDisk(output, base);
+            result.add(base);
+        }
 
         System.out.println("Sort-Merge-Join with I/O : " + (buffer.getIOCounter() - basicIO));
         return result;
@@ -137,8 +245,11 @@ public class Joiner {
 
     public static void main(String[] args) {
         // nest-loop-join
-        System.out.println(new Joiner(ExtMem.getDefaultBuffer()).nestLoopJoin(
-                Calculator.getAddrList("R", false), Calculator.getAddrList("S", false)));
+        // System.out.println(new Joiner(ExtMem.getDefaultBuffer()).nestLoopJoin(
+        // Calculator.getAddrList("R", false), Calculator.getAddrList("S", false)));
+
+        System.out.println(new Joiner(ExtMem.getDefaultBuffer()).sortMergeJoin(
+                Calculator.getAddrList("R", true), Calculator.getAddrList("S", true)));
 
     }
 

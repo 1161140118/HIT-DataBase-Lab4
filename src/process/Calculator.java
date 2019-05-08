@@ -77,6 +77,12 @@ public class Calculator {
         System.out.println("Init Buffer with I/O : " + buffer.getIOCounter());
     }
 
+    /**
+     * get list of block addr.
+     * @param relation  R or S
+     * @param sorted    
+     * @return
+     */
     public static List<Integer> getAddrList(String relation, boolean sorted) {
         int base = sorted ? SORTEDBASE : RAWDATABASE;
         int len;

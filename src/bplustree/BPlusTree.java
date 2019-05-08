@@ -49,6 +49,7 @@ public class BPlusTree<V> {
     }
 
     public static BPlusTree<Reference> getBPlusTree(List<Integer> addrList, Buffer buffer) {
+        int basicIO = buffer.getIOCounter();
         BPlusTree<Reference> tree = new BPlusTree<>(4);
         for (Integer integer : addrList) {
             Block input = buffer.readBlockFromDisk(integer);
@@ -57,6 +58,7 @@ public class BPlusTree<V> {
             }
             buffer.freeBlockInBuffer(input);
         }
+        System.out.println("B+ tree with I/O : " + (buffer.getIOCounter() - basicIO));
         return tree;
     }
 
