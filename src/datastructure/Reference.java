@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bplustree;
+package datastructure;
 
 /**
  * @author standingby

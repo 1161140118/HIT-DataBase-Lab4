@@ -1,7 +1,7 @@
 /**
  * 
  */
-package bplustree;
+package datastructure;
 
 import java.util.List;
 import process.Calculator;
