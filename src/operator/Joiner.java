@@ -4,9 +4,11 @@
 package operator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import datastructure.HashBucket;
 import datastructure.Reference;
 import process.Calculator;
 import utils.Block;
@@ -237,7 +239,8 @@ public class Joiner {
     }
 
 
-    public List<Integer> hashJoin() {
+    public List<Integer> hashJoin(Map<Integer, List<Reference>> rBuckets,
+            Map<Integer, List<Reference>> sBuckets) {
         buffer.free();
         int basicIO = buffer.getIOCounter();
         List<Integer> result = new ArrayList<>();
@@ -245,13 +248,42 @@ public class Joiner {
         int base = Calculator.JOINBASE + 30000;
         Block output = buffer.getNewBlockInBuffer();
         Block inputR;
-        List<Block> inputS = new ArrayList<>();
-        
-        
+        Block inputS;
 
-        
+        for (Integer r : rBuckets.keySet()) {
+            for (Reference rRef : rBuckets.get(r)) {
+                if (!sBuckets.containsKey(r)) {
+                    continue;
+                }
+                inputR = buffer.readBlockFromDisk(rRef.block);
 
+                for (Reference sRef : sBuckets.get(r)) {
+                    inputS = buffer.readBlockFromDisk(sRef.block);
 
+                    if (inputR.data[rRef.index] == inputS.data[sRef.index]) {
+                        output.writeData(inputR.data[rRef.index]);
+                        output.writeData(inputR.data[rRef.index + 1]);
+                        output.writeData(inputS.data[sRef.index]);
+                        output.writeData(inputS.data[sRef.index + 1]);
+                        if (output.getIndex() == 12) {
+                            output.writeData(0);
+                            output.writeData(0);
+                            output.writeData(base + 1);
+                            buffer.writeBlockToDisk(output, base);
+                            result.add(base);
+                            output = buffer.getNewBlockInBuffer();
+                            base++;
+                        }
+                    }
+                    buffer.freeBlockInBuffer(inputS);
+                }
+                buffer.freeBlockInBuffer(inputR);
+            }
+        }
+        if (!output.isEmpty()) {
+            buffer.writeBlockToDisk(output, base);
+            result.add(base);
+        }
         System.out.println("Hash-Join with I/O : " + (buffer.getIOCounter() - basicIO));
         return result;
     }
@@ -266,7 +298,10 @@ public class Joiner {
         // System.out.println(new Joiner(ExtMem.getDefaultBuffer()).sortMergeJoin(
         // Calculator.getAddrList("R", true), Calculator.getAddrList("S", true)));
 
-
+        Buffer buffer = ExtMem.getDefaultBuffer();
+        System.out.println(new Joiner(buffer).hashJoin(
+                new HashBucket(Calculator.getAddrList("R", false), buffer).getHashBuckets(),
+                new HashBucket(Calculator.getAddrList("S", false), buffer).getHashBuckets()));
 
     }
 
