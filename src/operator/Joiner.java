@@ -4,7 +4,9 @@
 package operator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import bplustree.Reference;
 import process.Calculator;
 import utils.Block;
@@ -96,6 +98,9 @@ public class Joiner {
         List<Integer> result = new ArrayList<>();
         // 基址
         int base = Calculator.JOINBASE + 20000;
+
+        Map<Integer, Block> temp = new HashMap<>();
+
         Block output = buffer.getNewBlockInBuffer();
         Block inputR;
         Block inputS = buffer.readBlockFromDisk(addrS.get(0));
@@ -127,7 +132,12 @@ public class Joiner {
                             if (inputS.id != preS.id) {
                                 buffer.freeBlockInBuffer(inputS);
                             }
-                            inputS = buffer.readBlockFromDisk(addrS.get(++curAddr));
+                            if (temp.containsKey(curAddr + 1)) {
+                                // 有缓存
+                                inputS = temp.get(++curAddr);
+                            } else {
+                                inputS = buffer.readBlockFromDisk(addrS.get(++curAddr));
+                            }
                             curindex = 0;
                         } else {
                             // 特殊
@@ -137,14 +147,15 @@ public class Joiner {
                                 break;
                             } else {
                                 // 回溯
-                                int sid = inputS.id;
+                                if (inputS.id != preS.id) {
+                                    // 不是同一个磁盘块，不占同一片缓存
+                                    // buffer.freeBlockInBuffer(sid);
+                                    // 保留当前块
+                                    temp.put(curAddr, inputS);
+                                }
                                 inputS = preS;
                                 curindex = preindex;
                                 curAddr = preAddr;
-                                if (sid != preS.id) {
-                                    // 不是同一个磁盘块，不占同一片缓存
-                                    buffer.freeBlockInBuffer(sid);
-                                }
                             }
                         }
 
@@ -188,22 +199,23 @@ public class Joiner {
 
                     if (rKey < curKey) {
                         if (rKey == preKey) {
-                            int sid = inputS.id;
-                            // s 回溯
+                            if (inputS.id != preS.id) {
+                                // 不是同一个磁盘块，不占同一片缓存
+                                // buffer.freeBlockInBuffer(sid);
+                                // 保留当前块
+                                temp.put(curAddr, inputS);
+                            }
                             inputS = preS;
                             curindex = preindex;
                             curAddr = preAddr;
-                            if (sid != preS.id) {
-                                buffer.freeBlockInBuffer(sid);
-                            }
                         } else {
-                            int preid = preS.id;
+                            // 更新pre
+                            if (preS.id != inputS.id) {
+                                buffer.freeBlockInBuffer(preS.id);
+                            }
                             preAddr = curAddr;
                             preS = inputS;
                             preindex = curindex;
-                            if (preid != inputS.id) {
-                                buffer.freeBlockInBuffer(preid);
-                            }
                         }
                         // 读取下一个r
                         break;
@@ -235,9 +247,10 @@ public class Joiner {
         Block inputR;
         List<Block> inputS = new ArrayList<>();
 
+        
 
 
-        System.out.println("Sort-Merge-Join with I/O : " + (buffer.getIOCounter() - basicIO));
+        System.out.println("Hash-Join with I/O : " + (buffer.getIOCounter() - basicIO));
         return result;
     }
 
@@ -248,8 +261,10 @@ public class Joiner {
         // System.out.println(new Joiner(ExtMem.getDefaultBuffer()).nestLoopJoin(
         // Calculator.getAddrList("R", false), Calculator.getAddrList("S", false)));
 
-        System.out.println(new Joiner(ExtMem.getDefaultBuffer()).sortMergeJoin(
-                Calculator.getAddrList("R", true), Calculator.getAddrList("S", true)));
+        // System.out.println(new Joiner(ExtMem.getDefaultBuffer()).sortMergeJoin(
+        // Calculator.getAddrList("R", true), Calculator.getAddrList("S", true)));
+
+
 
     }
 
