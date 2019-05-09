@@ -50,7 +50,7 @@ public class HashBucket {
     }
 
     public static int hashFunc(int key) {
-        return key % 20;
+        return key % 10;
     }
 
 }
