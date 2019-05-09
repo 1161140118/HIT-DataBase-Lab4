@@ -248,7 +248,8 @@ public class Joiner {
 		Block output = buffer.getNewBlockInBuffer();
 		Map<Integer, Block> inputRs = new HashMap<>();
 		Block inputR;
-		Block inputS;
+		Block inputS = null;
+		int preAddrS = -1;
 
 		for (Integer r : rBuckets.keySet()) {
 			if (!sBuckets.containsKey(r)) {
@@ -257,7 +258,9 @@ public class Joiner {
 			}
 
 			List<Reference> rRefs = rBuckets.get(r);
+			List<Reference> sRefs = sBuckets.get(r);
 			Collections.sort(rRefs);
+			Collections.sort(sRefs);
 
 			// 尽量多的读入R
 			for (int i = 0; i < rRefs.size();) {
@@ -281,8 +284,14 @@ public class Joiner {
 					}
 				}
 
-				for (Reference sRef : sBuckets.get(r)) {
-					inputS = buffer.readBlockFromDisk(sRef.block);
+				for (Reference sRef : sRefs) {
+
+//					if (preAddrS != sRef.block) {
+						// 无缓冲，读取
+						buffer.freeBlockInBuffer(inputS);
+						inputS = buffer.readBlockFromDisk(sRef.block);
+						preAddrS = sRef.block;
+//					}
 
 					for (Reference rRef : rRefs) {
 						if (!inputRs.containsKey(rRef.block)) {
